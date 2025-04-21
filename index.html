@@ -11,6 +11,8 @@
       background-color: #f4f9f9;
       color: #333;
       direction: rtl;
+      height: 100vh;
+      overflow: hidden;
     }header {
   background-color: #4db6ac;
   color: white;
@@ -20,6 +22,8 @@
 }
 
 main {
+  height: calc(100vh - 70px);
+  overflow-y: auto;
   padding: 1rem;
 }
 
@@ -60,8 +64,8 @@ button {
   border-radius: 8px;
   padding: 1rem;
   background-color: white;
-  min-height: 300px;
-  margin-top: 1rem;
+  min-height: 70vh;
+  overflow-y: auto;
 }
 
 .toolbar input[type="color"] {
@@ -94,37 +98,53 @@ button {
   margin: 0 0 1rem;
 }
 
+.fullscreen-image {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.fullscreen-image img {
+  max-width: 90%;
+  max-height: 90%;
+}
+
   </style>
 </head>
 <body>
   <header>كشكولي</header>
   <main>
-    <!-- صفحة المواد -->
     <section id="foldersPage">
       <h2>موادك</h2>
       <div id="foldersList"></div>
       <button onclick="addFolder()">+ مادة جديدة</button>
-    </section><!-- صفحة الدروس داخل المادة -->
-<section id="lessonsPage">
+    </section><section id="lessonsPage">
   <button onclick="backToFolders()">عودة للمواد</button>
   <h2 id="currentFolderTitle"></h2>
   <div id="lessonsList"></div>
   <button onclick="addLesson()">+ درس جديد</button>
 </section>
 
-<!-- صفحة الدرس -->
 <section id="editorPage">
   <button onclick="backToLessons()">عودة للدروس</button>
   <h2 id="lessonTitle"></h2>
 
   <div class="toolbar">
-    <button onclick="insertTitleBox()">+ عنوان داخل الدرس</button>
-    <button onclick="insertQuestionBox()">+ سؤال</button>
-    <button onclick="insertAnswerBox()">+ إجابة</button>
-    <button onclick="document.execCommand('bold', false, null)">عريض</button>
-    <button onclick="document.execCommand('italic', false, null)">مائل</button>
-    <button onclick="document.execCommand('insertUnorderedList', false, null)">قائمة نقطية</button>
+    <button onclick="insertAtCursor('<div class=\'title-box\' contenteditable=\'true\'>عنوان جديد</div><div><br></div>')">+ عنوان</button>
+    <button onclick="insertAtCursor('<div class=\'question-box\' contenteditable=\'true\'>س: اكتب في ...</div><div><br></div>')">+ سؤال</button>
+    <button onclick="insertAtCursor('<div class=\'answer-box\' contenteditable=\'true\'>الإجابة:</div><div><br></div>')">+ إجابة</button>
+    <button onclick="document.execCommand('bold')">عريض</button>
+    <button onclick="document.execCommand('italic')">مائل</button>
+    <button onclick="document.execCommand('insertUnorderedList')">قائمة نقطية</button>
     <input type="color" id="colorPicker">
+    <input type="file" id="imageInput" accept="image/*">
   </div>
 
   <div id="editor" contenteditable="true">اكتب هنا...</div>
@@ -135,11 +155,11 @@ button {
     let currentFolder = null;
     let currentLesson = null;
 
-    function showPage(pageId) {
+    function showPage(id) {
       document.getElementById("foldersPage").style.display = "none";
       document.getElementById("lessonsPage").style.display = "none";
       document.getElementById("editorPage").style.display = "none";
-      document.getElementById(pageId).style.display = "block";
+      document.getElementById(id).style.display = "block";
     }
 
     function addFolder() {
@@ -205,49 +225,44 @@ button {
       showPage("lessonsPage");
     }
 
-    function insertTitleBox() {
-      const box = document.createElement("div");
-      box.className = "title-box";
-      box.contentEditable = true;
-      box.textContent = "عنوان جديد";
-      document.getElementById("editor").appendChild(box);
-      const spacer = document.createElement("div");
-      spacer.innerHTML = "<br>";
-      spacer.contentEditable = true;
-      document.getElementById("editor").appendChild(spacer);
-      spacer.focus();
+    function insertAtCursor(html) {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      const el = document.createElement("div");
+      el.innerHTML = html;
+      const frag = document.createDocumentFragment();
+      let node;
+      while ((node = el.firstChild)) {
+        frag.appendChild(node);
+      }
+      range.deleteContents();
+      range.insertNode(frag);
     }
 
-    function insertQuestionBox() {
-      const box = document.createElement("div");
-      box.className = "question-box";
-      box.contentEditable = true;
-      box.textContent = "س: اكتب في ...";
-      document.getElementById("editor").appendChild(box);
-      const spacer = document.createElement("div");
-      spacer.innerHTML = "<br>";
-      spacer.contentEditable = true;
-      document.getElementById("editor").appendChild(spacer);
-      spacer.focus();
-    }
-
-    function insertAnswerBox() {
-      const box = document.createElement("div");
-      box.className = "answer-box";
-      box.contentEditable = true;
-      box.textContent = "الإجابة:";
-      document.getElementById("editor").appendChild(box);
-      const spacer = document.createElement("div");
-      spacer.innerHTML = "<br>";
-      spacer.contentEditable = true;
-      document.getElementById("editor").appendChild(spacer);
-      spacer.focus();
-    }
-
-    document.getElementById("colorPicker").addEventListener("input", function() {
+    document.getElementById("colorPicker").addEventListener("input", function () {
       document.execCommand("styleWithCSS", false, true);
       document.execCommand("foreColor", false, this.value);
-      document.getElementById("editor").focus();
+    });
+
+    document.getElementById("imageInput").addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function () {
+        const img = document.createElement("img");
+        img.src = reader.result;
+        img.style.maxWidth = "150px";
+        img.style.cursor = "pointer";
+        img.onclick = function () {
+          const overlay = document.createElement("div");
+          overlay.className = "fullscreen-image";
+          overlay.innerHTML = `<img src="${img.src}" onclick="this.parentElement.remove()">`;
+          document.body.appendChild(overlay);
+        };
+        insertAtCursor(img.outerHTML);
+      };
+      reader.readAsDataURL(file);
     });
 
     renderFolders();
