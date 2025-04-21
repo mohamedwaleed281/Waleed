@@ -104,10 +104,10 @@ button {
 
   <div class="toolbar">
     <button onclick="insertTitleBox()">+ عنوان داخل الدرس</button>
-    <button onclick="document.execCommand('bold')">عريض</button>
-    <button onclick="document.execCommand('italic')">مائل</button>
-    <button onclick="document.execCommand('insertUnorderedList')">قائمة نقطية</button>
-    <input type="color" onchange="changeTextColor(this.value)">
+    <button onclick="document.execCommand('bold', false, null)">عريض</button>
+    <button onclick="document.execCommand('italic', false, null)">مائل</button>
+    <button onclick="document.execCommand('insertUnorderedList', false, null)">قائمة نقطية</button>
+    <input type="color" id="colorPicker">
   </div>
 
   <div id="editor" contenteditable="true">اكتب هنا...</div>
@@ -194,13 +194,19 @@ button {
       box.contentEditable = true;
       box.textContent = "عنوان جديد";
       document.getElementById("editor").appendChild(box);
-      box.focus();
+
+      const spacer = document.createElement("div");
+      spacer.innerHTML = "<br>";
+      spacer.contentEditable = true;
+      document.getElementById("editor").appendChild(spacer);
+      spacer.focus();
     }
 
-    function changeTextColor(color) {
+    document.getElementById("colorPicker").addEventListener("input", function() {
       document.execCommand("styleWithCSS", false, true);
-      document.execCommand("foreColor", false, color);
-    }
+      document.execCommand("foreColor", false, this.value);
+      document.getElementById("editor").focus();
+    });
 
     renderFolders();
     showPage("foldersPage");
