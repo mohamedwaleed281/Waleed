@@ -1,90 +1,208 @@
-<!DOCTYPE html>
-<html lang="ar">
+<!DOCTYPE html><html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق طلبات المطعم</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>كشكولي</title>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f9f9;
+      color: #333;
+      direction: rtl;
+    }header {
+  background-color: #4db6ac;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  font-size: 1.5rem;
+}
+
+main {
+  padding: 1rem;
+}
+
+.folder, .lesson {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.folder:hover, .lesson:hover {
+  background-color: #e0f2f1;
+}
+
+.hidden {
+  display: none;
+}
+
+button {
+  background-color: #4db6ac;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 0.25rem;
+}
+
+#editorPage, #lessonsPage {
+  display: none;
+}
+
+#editor {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: white;
+  min-height: 300px;
+  margin-top: 1rem;
+}
+
+.toolbar input[type="color"] {
+  width: 30px;
+  height: 30px;
+  border: none;
+  margin: 0 5px;
+}
+
+.title-box {
+  background-color: #dcedc8;
+  border-left: 5px solid #8bc34a;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  font-weight: bold;
+}
+
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1> بابا عبده </h1>
-        
-        <label for="num-tables">عدد الترابيزات:</label>
-        <input type="number" id="num-tables" min="1" max="10" value="1">
-        <button onclick="createTables()">إنشاء الترابيزات</button>
-        
-        <div id="tables"></div>
+  <header>كشكولي</header>
+  <main>
+    <!-- صفحة المواد -->
+    <section id="foldersPage">
+      <h2>موادك</h2>
+      <div id="foldersList"></div>
+      <button onclick="addFolder()">+ مادة جديدة</button>
+    </section><!-- صفحة الدروس داخل المادة -->
+<section id="lessonsPage">
+  <button onclick="backToFolders()">عودة للمواد</button>
+  <h2 id="currentFolderTitle"></h2>
+  <div id="lessonsList"></div>
+  <button onclick="addLesson()">+ درس جديد</button>
+</section>
 
-        <!-- قائمة الطعام كنافذة منبثقة -->
-        <div id="menu-popup" class="menu-popup">
-            <h2>القائمة</h2>
-            <div class="menu">
-                <!-- قسم المكرونة -->
-                <div class="section">
-                    <h3>المكرونة</h3>
-                    <button onclick="chooseExtraOption('مكرونة صغير', 25)">مكرونة صغير - 25</button>
-                    <button onclick="chooseExtraOption('مكرونة وسط', 30)">مكرونة وسط - 30</button>
-                    <button onclick="chooseExtraOption('مكرونة كبير', 35)">مكرونة كبير - 35</button>
-                    <button onclick="chooseExtraOption('مكرونة كينج', 45)">مكرونة كينج - 45</button>
-                </div>   <!-- قسم الكشري -->
-                <div class="section">
-                    <h3>الكشري</h3>
-                    <button onclick="addOrderToActiveTable('كشري صغير', 25)">كشري صغير - 25</button>
-                    <button onclick="addOrderToActiveTable('كشري وسط', 30)">كشري وسط - 30</button>
-                    <button onclick="addOrderToActiveTable('كشري كبير', 35)">كشري كبير - 35</button>
-                    <button onclick="addOrderToActiveTable('كشري كينج', 45)">كشري كينج - 45</button>
-                </div>
-                
-                <!-- قسم الطواجن -->
-                <div class="section">
-                    <h3>الطواجن</h3>
-                    <button onclick="addOrderToActiveTable('طاجن فراخ', 45)">طاجن فراخ - 45</button>
-                    <button onclick="addOrderToActiveTable('طاجن لحمة', 45)">طاجن لحمة - 45</button>
-                </div>
+<!-- صفحة الدرس -->
+<section id="editorPage">
+  <button onclick="backToLessons()">عودة للدروس</button>
+  <h2 id="lessonTitle"></h2>
 
-                <!-- قسم الإضافات -->
-                <div class="section">
-                    <h3>الإضافات والمشروبات</h3>
-                    <button onclick="addOrderToActiveTable('كبدة', 20)">كبدة - 20</button>
-                    <button onclick="addOrderToActiveTable('سجق', 20)">سجق - 20</button>
-                    <button onclick="addOrderToActiveTable('مكس', 20)">مكس - 20</button>
-                    <button onclick="addOrderToActiveTable('صلصة', 10)">صلصة -10</button>
-                    <button onclick="addOrderToActiveTable('تقلية', 10)">تقلية - 10</button>
-                    <button onclick="addOrderToActiveTable('عدس', 10)">عدس - 10</button>
-                    <button onclick="addOrderToActiveTable('مشروب غازي', 15)">مشروب غازي - 15</button>
-                    <button onclick="addOrderToActiveTable('أرز بلبن', 13)">أرز بلبن - 13</button>
-                    <button onclick="addOrderToActiveTable('مياه', 5)">مياه - 5</button>
-                </div>
-            </div>
-            <button onclick="closeMenu()">إغلاق</button>
-        </div>
+  <div class="toolbar">
+    <button onclick="insertTitleBox()">+ عنوان داخل الدرس</button>
+    <button onclick="document.execCommand('bold')">عريض</button>
+    <button onclick="document.execCommand('italic')">مائل</button>
+    <button onclick="document.execCommand('insertUnorderedList')">قائمة نقطية</button>
+    <input type="color" onchange="changeTextColor(this.value)">
+  </div>
 
-        <!-- نافذة اختيار إضافات كبدة/سجق/مكس/بدون -->
-        <div id="extra-option-popup" class="menu-popup">
-            <h3>اختر إضافة:</h3>
-            <button onclick="selectPastaType('كبدة')">كبدة</button>
-            <button onclick="selectPastaType('سجق')">سجق</button>
-            <button onclick="selectPastaType('مكس')">مكس</button>
-            <button onclick="selectPastaType('بدون')">بدون</button>
-            <button onclick="closeExtraOptionPopup()">إلغاء</button>
-        </div>
+  <div id="editor" contenteditable="true">اكتب هنا...</div>
+</section>
 
-<!-- نافذة اختيار نوع المكرونة -->
-        <div id="pasta-type-popup" class="menu-popup">
-            <h3>اختر نوع المكرونة:</h3>
-            <button onclick="addPastaOrder('اسباجتي')">اسباجتي</button>
-            <button onclick="addPastaOrder('مقصوصة')">مقصوصة</button>
-            <button onclick="addPastaOrder('مشكل')">مشكل</button>
-            <button onclick="closePastaTypePopup()">إلغاء</button>
-        </div>
-        
-        <!-- أسفل التطبيق -->
-        <footer class="footer">
-            <p>التطبيق تحت إشراف: <span>محمد وليد سعد</span></p>
-        </footer>
-    </div>
+  </main>  <script>
+    const folders = [];
+    let currentFolder = null;
+    let currentLesson = null;
 
-    <script src="script.js"></script>
-</body>
+    function showPage(pageId) {
+      document.getElementById("foldersPage").style.display = "none";
+      document.getElementById("lessonsPage").style.display = "none";
+      document.getElementById("editorPage").style.display = "none";
+      document.getElementById(pageId).style.display = "block";
+    }
+
+    function addFolder() {
+      const name = prompt("اسم المادة:");
+      if (!name) return;
+      folders.push({ name, lessons: [] });
+      renderFolders();
+    }
+
+    function renderFolders() {
+      const list = document.getElementById("foldersList");
+      list.innerHTML = "";
+      folders.forEach((folder, index) => {
+        const div = document.createElement("div");
+        div.className = "folder";
+        div.textContent = folder.name;
+        div.onclick = () => openFolder(index);
+        list.appendChild(div);
+      });
+    }
+
+    function openFolder(index) {
+      currentFolder = folders[index];
+      document.getElementById("currentFolderTitle").textContent = currentFolder.name;
+      showPage("lessonsPage");
+      renderLessons();
+    }
+
+    function addLesson() {
+      const name = prompt("اسم الدرس:");
+      if (!name) return;
+      currentFolder.lessons.push({ name, content: "" });
+      renderLessons();
+    }
+
+    function renderLessons() {
+      const list = document.getElementById("lessonsList");
+      list.innerHTML = "";
+      currentFolder.lessons.forEach((lesson, index) => {
+        const div = document.createElement("div");
+        div.className = "lesson";
+        div.textContent = lesson.name;
+        div.onclick = () => openLesson(index);
+        list.appendChild(div);
+      });
+    }
+
+    function openLesson(index) {
+      currentLesson = currentFolder.lessons[index];
+      document.getElementById("lessonTitle").textContent = currentLesson.name;
+      document.getElementById("editor").innerHTML = currentLesson.content || "";
+      showPage("editorPage");
+    }
+
+    function backToFolders() {
+      showPage("foldersPage");
+    }
+
+    function backToLessons() {
+      if (currentLesson) {
+        currentLesson.content = document.getElementById("editor").innerHTML;
+      }
+      showPage("lessonsPage");
+    }
+
+    function insertTitleBox() {
+      const box = document.createElement("div");
+      box.className = "title-box";
+      box.contentEditable = true;
+      box.textContent = "عنوان جديد";
+      document.getElementById("editor").appendChild(box);
+      box.focus();
+    }
+
+    function changeTextColor(color) {
+      document.execCommand("styleWithCSS", false, true);
+      document.execCommand("foreColor", false, color);
+    }
+
+    renderFolders();
+    showPage("foldersPage");
+  </script></body>
 </html>
