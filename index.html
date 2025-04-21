@@ -79,6 +79,21 @@ button {
   font-weight: bold;
 }
 
+.question-box {
+  background-color: #fff3cd;
+  border-right: 5px solid #ffc107;
+  padding: 0.5rem;
+  margin: 1rem 0 0.5rem;
+  font-weight: bold;
+}
+
+.answer-box {
+  background-color: #e3f2fd;
+  border-right: 5px solid #2196f3;
+  padding: 0.5rem;
+  margin: 0 0 1rem;
+}
+
   </style>
 </head>
 <body>
@@ -104,6 +119,8 @@ button {
 
   <div class="toolbar">
     <button onclick="insertTitleBox()">+ عنوان داخل الدرس</button>
+    <button onclick="insertQuestionBox()">+ سؤال</button>
+    <button onclick="insertAnswerBox()">+ إجابة</button>
     <button onclick="document.execCommand('bold', false, null)">عريض</button>
     <button onclick="document.execCommand('italic', false, null)">مائل</button>
     <button onclick="document.execCommand('insertUnorderedList', false, null)">قائمة نقطية</button>
@@ -194,7 +211,32 @@ button {
       box.contentEditable = true;
       box.textContent = "عنوان جديد";
       document.getElementById("editor").appendChild(box);
+      const spacer = document.createElement("div");
+      spacer.innerHTML = "<br>";
+      spacer.contentEditable = true;
+      document.getElementById("editor").appendChild(spacer);
+      spacer.focus();
+    }
 
+    function insertQuestionBox() {
+      const box = document.createElement("div");
+      box.className = "question-box";
+      box.contentEditable = true;
+      box.textContent = "س: اكتب في ...";
+      document.getElementById("editor").appendChild(box);
+      const spacer = document.createElement("div");
+      spacer.innerHTML = "<br>";
+      spacer.contentEditable = true;
+      document.getElementById("editor").appendChild(spacer);
+      spacer.focus();
+    }
+
+    function insertAnswerBox() {
+      const box = document.createElement("div");
+      box.className = "answer-box";
+      box.contentEditable = true;
+      box.textContent = "الإجابة:";
+      document.getElementById("editor").appendChild(box);
       const spacer = document.createElement("div");
       spacer.innerHTML = "<br>";
       spacer.contentEditable = true;
