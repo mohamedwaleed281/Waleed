@@ -1,7 +1,8 @@
-<!DOCTYPE html><html lang="ar">
+<!DOCTYPE html>
+<html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>كشكولي</title>
   <style>
     body {
@@ -13,109 +14,79 @@
       direction: rtl;
       height: 100vh;
       overflow: hidden;
-    }header {
-  background-color: #4db6ac;
-  color: white;
-  text-align: center;
-  padding: 1rem;
-  font-size: 1.5rem;
-}
-
-main {
-  height: calc(100vh - 70px);
-  overflow-y: auto;
-  padding: 1rem;
-}
-
-.folder, .lesson {
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  margin: 0.5rem 0;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.folder:hover, .lesson:hover {
-  background-color: #e0f2f1;
-}
-
-.hidden {
-  display: none;
-}
-
-button {
-  background-color: #4db6ac;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 0.25rem;
-}
-
-#editorPage, #lessonsPage {
-  display: none;
-}
-
-#editor {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 1rem;
-  background-color: white;
-  min-height: 70vh;
-  overflow-y: auto;
-}
-
-.toolbar input[type="color"] {
-  width: 30px;
-  height: 30px;
-  border: none;
-  margin: 0 5px;
-}
-
-.title-box {
-  background-color: #dcedc8;
-  border-left: 5px solid #8bc34a;
-  padding: 0.5rem;
-  margin: 0.5rem 0;
-  font-weight: bold;
-}
-
-.question-box {
-  background-color: #fff3cd;
-  border-right: 5px solid #ffc107;
-  padding: 0.5rem;
-  margin: 1rem 0 0.5rem;
-  font-weight: bold;
-}
-
-.answer-box {
-  background-color: #e3f2fd;
-  border-right: 5px solid #2196f3;
-  padding: 0.5rem;
-  margin: 0 0 1rem;
-}
-
-.fullscreen-image {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.fullscreen-image img {
-  max-width: 90%;
-  max-height: 90%;
-}
-
+    }
+    header {
+      background-color: #4db6ac;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.5rem;
+    }
+    main {
+      height: calc(100vh - 70px);
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    .folder, .lesson {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem 0;
+      cursor: pointer;
+    }
+    .hidden { display: none; }
+    button {
+      background-color: #4db6ac;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 0.25rem;
+    }
+    #editorPage, #lessonsPage { display: none; }
+    #editor {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1rem;
+      background-color: white;
+      min-height: 70vh;
+      overflow-y: auto;
+    }
+    .toolbar input[type="color"] {
+      width: 30px; height: 30px; border: none; margin: 0 5px;
+    }
+    .title-box {
+      background-color: #dcedc8;
+      border-left: 5px solid #8bc34a;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      font-weight: bold;
+    }
+    .question-box {
+      background-color: #fff3cd;
+      border-right: 5px solid #ffc107;
+      padding: 0.5rem;
+      margin: 1rem 0 0.5rem;
+      font-weight: bold;
+    }
+    .answer-box {
+      background-color: #e3f2fd;
+      border-right: 5px solid #2196f3;
+      padding: 0.5rem;
+      margin: 0 0 1rem;
+    }
+    .fullscreen-image {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+    }
+    .fullscreen-image img {
+      max-width: 90%; max-height: 90%;
+    }
   </style>
 </head>
 <body>
@@ -125,35 +96,39 @@ button {
       <h2>موادك</h2>
       <div id="foldersList"></div>
       <button onclick="addFolder()">+ مادة جديدة</button>
-    </section><section id="lessonsPage">
-  <button onclick="backToFolders()">عودة للمواد</button>
-  <h2 id="currentFolderTitle"></h2>
-  <div id="lessonsList"></div>
-  <button onclick="addLesson()">+ درس جديد</button>
-</section>
+    </section>
 
-<section id="editorPage">
-  <button onclick="backToLessons()">عودة للدروس</button>
-  <h2 id="lessonTitle"></h2>
+    <section id="lessonsPage">
+      <button onclick="backToFolders()">عودة للمواد</button>
+      <h2 id="currentFolderTitle"></h2>
+      <div id="lessonsList"></div>
+      <button onclick="addLesson()">+ درس جديد</button>
+    </section>
 
-  <div class="toolbar">
-    <button onclick="insertAtCursor('<div class=\'title-box\' contenteditable=\'true\'>عنوان جديد</div><div><br></div>')">+ عنوان</button>
-    <button onclick="insertAtCursor('<div class=\'question-box\' contenteditable=\'true\'>س: اكتب في ...</div><div><br></div>')">+ سؤال</button>
-    <button onclick="insertAtCursor('<div class=\'answer-box\' contenteditable=\'true\'>الإجابة:</div><div><br></div>')">+ إجابة</button>
-    <button onclick="document.execCommand('bold')">عريض</button>
-    <button onclick="document.execCommand('italic')">مائل</button>
-    <button onclick="document.execCommand('insertUnorderedList')">قائمة نقطية</button>
-    <input type="color" id="colorPicker">
-    <input type="file" id="imageInput" accept="image/*">
-  </div>
+    <section id="editorPage">
+      <button onclick="backToLessons()">عودة للدروس</button>
+      <h2 id="lessonTitle"></h2>
+      <div class="toolbar">
+        <button onclick="insertAtCursor('<div class=\\'title-box\\' contenteditable=\\'true\\'>عنوان جديد</div><div><br></div>')">+ عنوان</button>
+        <button onclick="insertAtCursor('<div class=\\'question-box\\' contenteditable=\\'true\\'>س: اكتب في ...</div><div><br></div>')">+ سؤال</button>
+        <button onclick="insertAtCursor('<div class=\\'answer-box\\' contenteditable=\\'true\\'>الإجابة:</div><div><br></div>')">+ إجابة</button>
+        <button onclick="document.execCommand('bold')">عريض</button>
+        <button onclick="document.execCommand('italic')">مائل</button>
+        <button onclick="document.execCommand('insertUnorderedList')">قائمة نقطية</button>
+        <input type="color" id="colorPicker">
+        <input type="file" id="imageInput" accept="image/*">
+      </div>
+      <div id="editor" contenteditable="true">اكتب هنا...</div>
+    </section>
+  </main>
 
-  <div id="editor" contenteditable="true">اكتب هنا...</div>
-</section>
+  <script>
+    let folders = JSON.parse(localStorage.getItem("folders")) || [];
+    let currentFolder = null, currentLesson = null;
 
-  </main>  <script>
-    const folders = [];
-    let currentFolder = null;
-    let currentLesson = null;
+    function saveData() {
+      localStorage.setItem("folders", JSON.stringify(folders));
+    }
 
     function showPage(id) {
       document.getElementById("foldersPage").style.display = "none";
@@ -166,6 +141,7 @@ button {
       const name = prompt("اسم المادة:");
       if (!name) return;
       folders.push({ name, lessons: [] });
+      saveData();
       renderFolders();
     }
 
@@ -192,6 +168,7 @@ button {
       const name = prompt("اسم الدرس:");
       if (!name) return;
       currentFolder.lessons.push({ name, content: "" });
+      saveData();
       renderLessons();
     }
 
@@ -214,13 +191,12 @@ button {
       showPage("editorPage");
     }
 
-    function backToFolders() {
-      showPage("foldersPage");
-    }
+    function backToFolders() { showPage("foldersPage"); }
 
     function backToLessons() {
       if (currentLesson) {
         currentLesson.content = document.getElementById("editor").innerHTML;
+        saveData();
       }
       showPage("lessonsPage");
     }
@@ -233,9 +209,7 @@ button {
       el.innerHTML = html;
       const frag = document.createDocumentFragment();
       let node;
-      while ((node = el.firstChild)) {
-        frag.appendChild(node);
-      }
+      while ((node = el.firstChild)) frag.appendChild(node);
       range.deleteContents();
       range.insertNode(frag);
     }
@@ -257,7 +231,7 @@ button {
         img.onclick = function () {
           const overlay = document.createElement("div");
           overlay.className = "fullscreen-image";
-          overlay.innerHTML = `<img src="${img.src}" onclick="this.parentElement.remove()">`;
+          overlay.innerHTML = `<img src=\"${img.src}\" onclick=\"this.parentElement.remove()\">`;
           document.body.appendChild(overlay);
         };
         insertAtCursor(img.outerHTML);
@@ -267,5 +241,6 @@ button {
 
     renderFolders();
     showPage("foldersPage");
-  </script></body>
+  </script>
+</body>
 </html>
