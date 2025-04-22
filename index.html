@@ -33,7 +33,20 @@
       border-radius: 8px;
       padding: 0.75rem 1rem;
       margin: 0.5rem 0;
+      position: relative;
+    }
+    .folder .actions, .lesson .actions {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .actions button {
+      background: none;
+      border: none;
+      font-size: 1rem;
       cursor: pointer;
+      margin-right: 5px;
     }
     .hidden { display: none; }
     button {
@@ -120,127 +133,169 @@
       </div>
       <div id="editor" contenteditable="true">اكتب هنا...</div>
     </section>
-  </main>
+    <script>
+  let folders = JSON.parse(localStorage.getItem("folders")) || [];
+  let currentFolder = null, currentLesson = null;
 
-  <script>
-    let folders = JSON.parse(localStorage.getItem("folders")) || [];
-    let currentFolder = null, currentLesson = null;
+  function saveData() {
+    localStorage.setItem("folders", JSON.stringify(folders));
+  }
 
-    function saveData() {
-      localStorage.setItem("folders", JSON.stringify(folders));
-    }
+  function showPage(id) {
+    document.getElementById("foldersPage").style.display = "none";
+    document.getElementById("lessonsPage").style.display = "none";
+    document.getElementById("editorPage").style.display = "none";
+    document.getElementById(id).style.display = "block";
+  }
 
-    function showPage(id) {
-      document.getElementById("foldersPage").style.display = "none";
-      document.getElementById("lessonsPage").style.display = "none";
-      document.getElementById("editorPage").style.display = "none";
-      document.getElementById(id).style.display = "block";
-    }
+  function addFolder() {
+    const name = prompt("اسم المادة:");
+    if (!name) return;
+    folders.push({ name, lessons: [] });
+    saveData();
+    renderFolders();
+  }
 
-    function addFolder() {
-      const name = prompt("اسم المادة:");
-      if (!name) return;
-      folders.push({ name, lessons: [] });
+  function editFolder(index) {
+    const newName = prompt("اسم جديد للمادة:", folders[index].name);
+    if (newName) {
+      folders[index].name = newName;
       saveData();
       renderFolders();
     }
+  }
 
-    function renderFolders() {
-      const list = document.getElementById("foldersList");
-      list.innerHTML = "";
-      folders.forEach((folder, index) => {
-        const div = document.createElement("div");
-        div.className = "folder";
-        div.textContent = folder.name;
-        div.onclick = () => openFolder(index);
-        list.appendChild(div);
-      });
+  function deleteFolder(index) {
+    if (confirm("هل تريد حذف هذه المادة؟")) {
+      folders.splice(index, 1);
+      saveData();
+      renderFolders();
     }
+  }
 
-    function openFolder(index) {
-      currentFolder = folders[index];
-      document.getElementById("currentFolderTitle").textContent = currentFolder.name;
-      showPage("lessonsPage");
-      renderLessons();
-    }
+  function renderFolders() {
+    const list = document.getElementById("foldersList");
+    list.innerHTML = "";
+    folders.forEach((folder, index) => {
+      const div = document.createElement("div");
+      div.className = "folder";
+      div.innerHTML = `
+        <span onclick="openFolder(${index})">${folder.name}</span>
+        <div class="actions">
+          <button onclick="editFolder(${index})">✏️</button>
+          <button onclick="deleteFolder(${index})">🗑️</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
 
-    function addLesson() {
-      const name = prompt("اسم الدرس:");
-      if (!name) return;
-      currentFolder.lessons.push({ name, content: "" });
+  function openFolder(index) {
+    currentFolder = folders[index];
+    document.getElementById("currentFolderTitle").textContent = currentFolder.name;
+    showPage("lessonsPage");
+    renderLessons();
+  }
+
+  function addLesson() {
+    const name = prompt("اسم الدرس:");
+    if (!name) return;
+    currentFolder.lessons.push({ name, content: "" });
+    saveData();
+    renderLessons();
+  }
+
+  function editLesson(index) {
+    const newName = prompt("اسم جديد للدرس:", currentFolder.lessons[index].name);
+    if (newName) {
+      currentFolder.lessons[index].name = newName;
       saveData();
       renderLessons();
     }
+  }
 
-    function renderLessons() {
-      const list = document.getElementById("lessonsList");
-      list.innerHTML = "";
-      currentFolder.lessons.forEach((lesson, index) => {
-        const div = document.createElement("div");
-        div.className = "lesson";
-        div.textContent = lesson.name;
-        div.onclick = () => openLesson(index);
-        list.appendChild(div);
-      });
+  function deleteLesson(index) {
+    if (confirm("هل تريد حذف هذا الدرس؟")) {
+      currentFolder.lessons.splice(index, 1);
+      saveData();
+      renderLessons();
     }
+  }
 
-    function openLesson(index) {
-      currentLesson = currentFolder.lessons[index];
-      document.getElementById("lessonTitle").textContent = currentLesson.name;
-      document.getElementById("editor").innerHTML = currentLesson.content || "";
-      showPage("editorPage");
-    }
-
-    function backToFolders() { showPage("foldersPage"); }
-
-    function backToLessons() {
-      if (currentLesson) {
-        currentLesson.content = document.getElementById("editor").innerHTML;
-        saveData();
-      }
-      showPage("lessonsPage");
-    }
-
-    function insertAtCursor(html) {
-      const sel = window.getSelection();
-      if (!sel.rangeCount) return;
-      const range = sel.getRangeAt(0);
-      const el = document.createElement("div");
-      el.innerHTML = html;
-      const frag = document.createDocumentFragment();
-      let node;
-      while ((node = el.firstChild)) frag.appendChild(node);
-      range.deleteContents();
-      range.insertNode(frag);
-    }
-
-    document.getElementById("colorPicker").addEventListener("input", function () {
-      document.execCommand("styleWithCSS", false, true);
-      document.execCommand("foreColor", false, this.value);
+  function renderLessons() {
+    const list = document.getElementById("lessonsList");
+    list.innerHTML = "";
+    currentFolder.lessons.forEach((lesson, index) => {
+      const div = document.createElement("div");
+      div.className = "lesson";
+      div.innerHTML = `
+        <span onclick="openLesson(${index})">${lesson.name}</span>
+        <div class="actions">
+          <button onclick="editLesson(${index})">✏️</button>
+          <button onclick="deleteLesson(${index})">🗑️</button>
+        </div>
+      `;
+      list.appendChild(div);
     });
+  }
 
-    document.getElementById("imageInput").addEventListener("change", function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function () {
-        const img = document.createElement("img");
-        img.src = reader.result;
-        img.style.maxWidth = "150px";
-        img.style.cursor = "pointer";
-        img.onclick = function () {
-          const overlay = document.createElement("div");
-          overlay.className = "fullscreen-image";
-          overlay.innerHTML = `<img src=\"${img.src}\" onclick=\"this.parentElement.remove()\">`;
-          document.body.appendChild(overlay);
-        };
-        insertAtCursor(img.outerHTML);
+  function openLesson(index) {
+    currentLesson = currentFolder.lessons[index];
+    document.getElementById("lessonTitle").textContent = currentLesson.name;
+    document.getElementById("editor").innerHTML = currentLesson.content || "";
+    showPage("editorPage");
+  }
+
+  function backToFolders() { showPage("foldersPage"); }
+
+  function backToLessons() {
+    if (currentLesson) {
+      currentLesson.content = document.getElementById("editor").innerHTML;
+      saveData();
+    }
+    showPage("lessonsPage");
+  }
+
+  function insertAtCursor(html) {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    const el = document.createElement("div");
+    el.innerHTML = html;
+    const frag = document.createDocumentFragment();
+    let node;
+    while ((node = el.firstChild)) frag.appendChild(node);
+    range.deleteContents();
+    range.insertNode(frag);
+  }
+
+  document.getElementById("colorPicker").addEventListener("input", function () {
+    document.execCommand("styleWithCSS", false, true);
+    document.execCommand("foreColor", false, this.value);
+  });
+
+  document.getElementById("imageInput").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function () {
+      const img = document.createElement("img");
+      img.src = reader.result;
+      img.style.maxWidth = "150px";
+      img.style.cursor = "pointer";
+      img.onclick = function () {
+        const overlay = document.createElement("div");
+        overlay.className = "fullscreen-image";
+        overlay.innerHTML = `<img src="${img.src}" onclick="this.parentElement.remove()">`;
+        document.body.appendChild(overlay);
       };
-      reader.readAsDataURL(file);
-    });
+      insertAtCursor(img.outerHTML);
+    };
+    reader.readAsDataURL(file);
+  });
 
-    renderFolders();
-    showPage("foldersPage");
-  </script>
+  renderFolders();
+  showPage("foldersPage");
+</script>
 </body>
 </html>
