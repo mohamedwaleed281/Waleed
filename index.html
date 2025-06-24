@@ -1,301 +1,307 @@
-<!DOCTYPE html>
-<html lang="ar">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>كشكولي</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة تتبّع الدومينو</title>
   <style>
+    /* الأساسيات */
     body {
-      font-family: 'Cairo', sans-serif;
       margin: 0;
-      padding: 0;
-      background-color: #f4f9f9;
-      color: #333;
-      direction: rtl;
-      height: 100vh;
-      overflow: hidden;
-    }
-    header {
-      background-color: #4db6ac;
-      color: white;
-      text-align: center;
-      padding: 1rem;
-      font-size: 1.5rem;
-    }
-    main {
-      height: calc(100vh - 70px);
-      overflow-y: auto;
-      padding: 1rem;
-    }
-    .folder, .lesson {
-      background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
-      margin: 0.5rem 0;
-      position: relative;
-    }
-    .folder .actions, .lesson .actions {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-    .actions button {
-      background: none;
-      border: none;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-right: 5px;
-    }
-    .hidden { display: none; }
-    button {
-      background-color: #4db6ac;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      cursor: pointer;
-      margin: 0.25rem;
-    }
-    #editorPage, #lessonsPage { display: none; }
-    #editor {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 1rem;
-      background-color: white;
-      min-height: 70vh;
-      overflow-y: auto;
-    }
-    .toolbar input[type="color"] {
-      width: 30px; height: 30px; border: none; margin: 0 5px;
-    }
-    .title-box {
-      background-color: #dcedc8;
-      border-left: 5px solid #8bc34a;
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      font-weight: bold;
-    }
-    .question-box {
-      background-color: #fff3cd;
-      border-right: 5px solid #ffc107;
-      padding: 0.5rem;
-      margin: 1rem 0 0.5rem;
-      font-weight: bold;
-    }
-    .answer-box {
-      background-color: #e3f2fd;
-      border-right: 5px solid #2196f3;
-      padding: 0.5rem;
-      margin: 0 0 1rem;
-    }
-    .fullscreen-image {
-      position: fixed;
-      top: 0; right: 0; bottom: 0; left: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 9999;
-    }
-    .fullscreen-image img {
-      max-width: 90%; max-height: 90%;
-    }
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }header {
+  padding: 1rem 1.5rem;
+  background: #1e293b;
+  color: #fff;
+  text-align: center;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* شبكة البلاطات */
+#dominoGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 100px);
+  grid-auto-rows: 200px;
+  gap: 12px;
+  justify-content: center;
+  flex: 1;
+}
+
+.tile {
+  width: 100px;
+  height: 200px;
+  border-radius: 8px;
+  border: 2px solid #334155;
+  background: #d4d4d4; /* مجهول */
+  position: relative;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tile.played {
+  background: #a7f3d0; /* أخضر باهت */
+}
+
+.tile.hand {
+  background: #fecaca; /* أحمر باهت */
+}
+
+/* القائمة المنسدلة */
+.state-select {
+  position: absolute;
+  bottom: 4px;
+  inset-inline-start: 4px;
+  width: 92px;
+  display: none;
+  font-size: 0.8rem;
+}
+
+.tile.show-select .state-select {
+  display: block;
+}
+
+/* العداد */
+aside#counterBox {
+  width: 160px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  height: fit-content;
+}
+
+aside h2 {
+  margin-top: 0;
+  font-size: 1rem;
+  text-align: center;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+table td {
+  padding: 4px 0;
+  text-align: center;
+}
+
+table tr:nth-child(even) td {
+  background: #f1f5f9;
+}
+
+#resetBtn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 6px;
+  border: none;
+  border-radius: 4px;
+  background: #475569;
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+#resetBtn:hover {
+  background: #334155;
+}
+
   </style>
 </head>
 <body>
-  <header>كشكولي</header>
-  <main>
-    <section id="foldersPage">
-      <h2>موادك</h2>
-      <div id="foldersList"></div>
-      <button onclick="addFolder()">+ مادة جديدة</button>
-    </section>
+  <header>
+    <h1>لوحة تتبّع الدومينو</h1>
+  </header>  <main>
+    <!-- شبكة البلاطات -->
+    <section id="dominoGrid" aria-label="شبكة البلاطات"></section><!-- العداد -->
+<aside id="counterBox">
+  <h2>الإحصاء</h2>
+  <table>
+    <tbody id="counterTable"></tbody>
+  </table>
+  <button id="resetBtn">إعادة ضبط</button>
+</aside>
 
-    <section id="lessonsPage">
-      <button onclick="backToFolders()">عودة للمواد</button>
-      <h2 id="currentFolderTitle"></h2>
-      <div id="lessonsList"></div>
-      <button onclick="addLesson()">+ درس جديد</button>
-    </section>
+  </main>  <script>
+    /* ---------- إعداد البيانات الأساسية ---------- */
+    const grid = document.getElementById("dominoGrid");
+    const counterTable = document.getElementById("counterTable");
+    const resetBtn = document.getElementById("resetBtn");
 
-    <section id="editorPage">
-      <button onclick="backToLessons()">عودة للدروس</button>
-      <h2 id="lessonTitle"></h2>
-      <div class="toolbar">
-        <button onclick="insertAtCursor('<div class=\'title-box\' contenteditable=\'true\'>عنوان جديد</div><div><br></div>')">+ عنوان</button>
-        <button onclick="insertAtCursor('<div class=\'question-box\' contenteditable=\'true\'>س: اكتب في ...</div><div><br></div>')">+ سؤال</button>
-        <button onclick="insertAtCursor('<div class=\'answer-box\' contenteditable=\'true\'>الإجابة:</div><div><br></div>')">+ إجابة</button>
-        <button onclick="document.execCommand('bold')">عريض</button>
-        <button onclick="document.execCommand('italic')">مائل</button>
-        <button onclick="document.execCommand('insertUnorderedList')">قائمة نقطية</button>
-        <input type="color" id="colorPicker">
-        <input type="file" id="imageInput" accept="image/*">
-      </div>
-      <div id="editor" contenteditable="true">اكتب هنا...</div>
-    </section>
-    <script>
-  let folders = JSON.parse(localStorage.getItem("folders")) || [];
-  let currentFolder = null, currentLesson = null;
-
-  function saveData() {
-    localStorage.setItem("folders", JSON.stringify(folders));
-  }
-
-  function showPage(id) {
-    document.getElementById("foldersPage").style.display = "none";
-    document.getElementById("lessonsPage").style.display = "none";
-    document.getElementById("editorPage").style.display = "none";
-    document.getElementById(id).style.display = "block";
-  }
-
-  function addFolder() {
-    const name = prompt("اسم المادة:");
-    if (!name) return;
-    folders.push({ name, lessons: [] });
-    saveData();
-    renderFolders();
-  }
-
-  function editFolder(index) {
-    const newName = prompt("اسم جديد للمادة:", folders[index].name);
-    if (newName) {
-      folders[index].name = newName;
-      saveData();
-      renderFolders();
+    // إنشاء قائمة بكل البلاطات (a <= b) لمجموعة Double-Six
+    const tilesData = [];
+    for (let a = 0; a <= 6; a++) {
+      for (let b = a; b <= 6; b++) {
+        tilesData.push({ a, b, id: `${a}-${b}` });
+      }
     }
-  }
 
-  function deleteFolder(index) {
-    if (confirm("هل تريد حذف هذه المادة؟")) {
-      folders.splice(index, 1);
-      saveData();
-      renderFolders();
-    }
-  }
+    /* ---------- رسم البلاطات (SVG) ---------- */
+    function dotPositions(value, offsetY = 0) {
+      // إحداثيات دائرية لنصف البلاطة (عرض 100، ارتفاع 100)
+      const pos = [
+        [25, 25], // 0 top-left
+        [50, 25], // 1 top-center
+        [75, 25], // 2 top-right
+        [25, 50], // 3 mid-left
+        [50, 50], // 4 center
+        [75, 50], // 5 mid-right
+        [25, 75], // 6 bottom-left
+        [50, 75], // 7 bottom-center
+        [75, 75]  // 8 bottom-right
+      ];
 
-  function renderFolders() {
-    const list = document.getElementById("foldersList");
-    list.innerHTML = "";
-    folders.forEach((folder, index) => {
-      const div = document.createElement("div");
-      div.className = "folder";
-      div.innerHTML = `
-        <span onclick="openFolder(${index})">${folder.name}</span>
-        <div class="actions">
-          <button onclick="editFolder(${index})">✏️</button>
-          <button onclick="deleteFolder(${index})">🗑️</button>
-        </div>
-      `;
-      list.appendChild(div);
-    });
-  }
-
-  function openFolder(index) {
-    currentFolder = folders[index];
-    document.getElementById("currentFolderTitle").textContent = currentFolder.name;
-    showPage("lessonsPage");
-    renderLessons();
-  }
-
-  function addLesson() {
-    const name = prompt("اسم الدرس:");
-    if (!name) return;
-    currentFolder.lessons.push({ name, content: "" });
-    saveData();
-    renderLessons();
-  }
-
-  function editLesson(index) {
-    const newName = prompt("اسم جديد للدرس:", currentFolder.lessons[index].name);
-    if (newName) {
-      currentFolder.lessons[index].name = newName;
-      saveData();
-      renderLessons();
-    }
-  }
-
-  function deleteLesson(index) {
-    if (confirm("هل تريد حذف هذا الدرس؟")) {
-      currentFolder.lessons.splice(index, 1);
-      saveData();
-      renderLessons();
-    }
-  }
-
-  function renderLessons() {
-    const list = document.getElementById("lessonsList");
-    list.innerHTML = "";
-    currentFolder.lessons.forEach((lesson, index) => {
-      const div = document.createElement("div");
-      div.className = "lesson";
-      div.innerHTML = `
-        <span onclick="openLesson(${index})">${lesson.name}</span>
-        <div class="actions">
-          <button onclick="editLesson(${index})">✏️</button>
-          <button onclick="deleteLesson(${index})">🗑️</button>
-        </div>
-      `;
-      list.appendChild(div);
-    });
-  }
-
-  function openLesson(index) {
-    currentLesson = currentFolder.lessons[index];
-    document.getElementById("lessonTitle").textContent = currentLesson.name;
-    document.getElementById("editor").innerHTML = currentLesson.content || "";
-    showPage("editorPage");
-  }
-
-  function backToFolders() { showPage("foldersPage"); }
-
-  function backToLessons() {
-    if (currentLesson) {
-      currentLesson.content = document.getElementById("editor").innerHTML;
-      saveData();
-    }
-    showPage("lessonsPage");
-  }
-
-  function insertAtCursor(html) {
-    const sel = window.getSelection();
-    if (!sel.rangeCount) return;
-    const range = sel.getRangeAt(0);
-    const el = document.createElement("div");
-    el.innerHTML = html;
-    const frag = document.createDocumentFragment();
-    let node;
-    while ((node = el.firstChild)) frag.appendChild(node);
-    range.deleteContents();
-    range.insertNode(frag);
-  }
-
-  document.getElementById("colorPicker").addEventListener("input", function () {
-    document.execCommand("styleWithCSS", false, true);
-    document.execCommand("foreColor", false, this.value);
-  });
-
-  document.getElementById("imageInput").addEventListener("change", function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function () {
-      const img = document.createElement("img");
-      img.src = reader.result;
-      img.style.maxWidth = "150px";
-      img.style.cursor = "pointer";
-      img.onclick = function () {
-        const overlay = document.createElement("div");
-        overlay.className = "fullscreen-image";
-        overlay.innerHTML = `<img src="${img.src}" onclick="this.parentElement.remove()">`;
-        document.body.appendChild(overlay);
+      // خريطة المواقع حسب الرقم
+      const mapping = {
+        0: [],
+        1: [4],
+        2: [0, 8],
+        3: [0, 4, 8],
+        4: [0, 2, 6, 8],
+        5: [0, 2, 4, 6, 8],
+        6: [0, 2, 3, 5, 6, 8]
       };
-      insertAtCursor(img.outerHTML);
-    };
-    reader.readAsDataURL(file);
-  });
 
-  renderFolders();
-  showPage("foldersPage");
-</script>
-</body>
+      return mapping[value].map(idx => {
+        const [x, y] = pos[idx];
+        return { cx: x, cy: y + offsetY };
+      });
+    }
+
+    function generateTileSVG(a, b) {
+      const circles = [
+        ...dotPositions(a, 0),
+        ...dotPositions(b, 100)
+      ];
+
+      const circlesMarkup = circles.map(c => `<circle cx="${c.cx}" cy="${c.cy}" r="8" fill="black" />`).join("\n");
+
+      return `
+        <svg viewBox="0 0 100 200" width="100" height="200" xmlns="http://www.w3.org/2000/svg" aria-label="${a}|${b}">
+          <rect x="1" y="1" width="98" height="198" rx="8" ry="8" fill="white" stroke="black" stroke-width="1.5" />
+          <line x1="0" y1="100" x2="100" y2="100" stroke="black" stroke-width="2" />
+          ${circlesMarkup}
+        </svg>`;
+    }
+
+    /* ---------- بناء واجهة البلاطات ---------- */
+    function buildTiles() {
+      const saved = JSON.parse(localStorage.getItem("dominoStates") || "{}");
+
+      tilesData.forEach(tile => {
+        const div = document.createElement("div");
+        div.className = "tile";
+        div.innerHTML = generateTileSVG(tile.a, tile.b);
+        div.dataset.id = tile.id;
+
+        // قائمة منسدلة
+        const select = document.createElement("select");
+        select.className = "state-select";
+        select.innerHTML = `
+          <option value="unknown">❔ غير معروف</option>
+          <option value="played">✅ نزلت</option>
+          <option value="hand">🛑 في إيدي</option>`;
+
+        div.appendChild(select);
+        grid.appendChild(div);
+
+        // تحميل الحالة المحفوظة
+        const initState = saved[tile.id] || "unknown";
+        select.value = initState;
+        applyState(div, initState);
+
+        // عند الضغط على البلاطة: إظهار / إخفاء القائمة
+        div.addEventListener("click", e => {
+          // لا تغلق لو الضغط على الـselect نفسه
+          if (e.target.tagName.toLowerCase() === "select") return;
+          div.classList.toggle("show-select");
+        });
+
+        // عند تغيير الاختيار
+        select.addEventListener("change", () => {
+          applyState(div, select.value);
+          saveStates();
+          updateCounter();
+        });
+      });
+    }
+
+    /* ---------- تطبيق الحالة على البلاطة ---------- */
+    function applyState(tileElement, state) {
+      tileElement.classList.remove("played", "hand");
+      if (state === "played") tileElement.classList.add("played");
+      else if (state === "hand") tileElement.classList.add("hand");
+
+      // ألغِ إظهار القائمة بعد الاختيار
+      tileElement.classList.remove("show-select");
+    }
+
+    /* ---------- حفظ واستعادة ---------- */
+    function saveStates() {
+      const states = {};
+      document.querySelectorAll(".tile").forEach(t => {
+        const select = t.querySelector("select");
+        states[t.dataset.id] = select.value;
+      });
+      localStorage.setItem("dominoStates", JSON.stringify(states));
+    }
+
+    /* ---------- تحديث العداد ---------- */
+    function updateCounter() {
+      // صفر العدادات
+      const counts = Array(7).fill(0);
+
+      document.querySelectorAll(".tile").forEach(t => {
+        const select = t.querySelector("select").value;
+        if (select === "unknown") {
+          const [a, b] = t.dataset.id.split("-").map(Number);
+          counts[a]++;
+          if (a !== b) counts[b]++;
+        }
+      });
+
+      // تحديث الجدول
+      counterTable.innerHTML = counts
+        .map(
+          (n, idx) => `
+            <tr>
+              <td>الرقم ${idx}</td>
+              <td>${n} باقي</td>
+            </tr>`
+        )
+        .join("\n");
+    }
+
+    /* ---------- إعادة ضبط ---------- */
+    resetBtn.addEventListener("click", () => {
+      if (!confirm("هل تريد إعادة الضبط؟")) return;
+      document.querySelectorAll(".tile").forEach(t => {
+        const select = t.querySelector("select");
+        select.value = "unknown";
+        applyState(t, "unknown");
+      });
+      saveStates();
+      updateCounter();
+    });
+
+    /* ---------- تهيئة ---------- */
+    buildTiles();
+    updateCounter();
+  </script></body>
 </html>
