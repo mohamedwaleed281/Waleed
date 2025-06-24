@@ -1,226 +1,153 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
+<!DOCTYPE html><html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>لوحة تتبّع الدومينو</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مساعد الدومينو</title>
   <style>
-    :root {
-      --clr-bg: #f8fafc;
-      --clr-card: #e2e8f0;  /* مجهول */
-      --clr-played: #34d399; /* أخضر عصري */
-      --clr-hand: #f87171;  /* أحمر هادئ */
-      --clr-border: #94a3b8;
-    }* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
-  background: var(--clr-bg);
-  color: #1e293b;
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: sans-serif;
+      padding: 1rem;
+    }.grid {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  gap: 0.5rem;
+  align-items: center;
 }
 
-header {
-  padding: 0.8rem 1rem;
-  background: #1e293b;
-  color: #fff;
-  text-align: center;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-main {
-  flex: 1;
+.row {
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.75rem;
-}
-
-/* شبكة البلاطات: 4 صفوف × 7 أعمدة */
-#dominoGrid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-  flex: 1;
-  max-width: 100%;
+  gap: 0.5rem;
+  justify-content: center;
 }
 
 .tile {
+  width: 48px;
+  aspect-ratio: 1 / 1.6;
+  background: linear-gradient(145deg, #2e2e2e, #1a1a1a);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem;
   position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 2; /* يحافظ على النسبة */
-  border-radius: 6px;
-  border: 1.5px solid var(--clr-border);
-  background: var(--clr-card);
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.15s ease;
-  user-select: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
-.tile:active { transform: scale(0.97); }
 
-.tile.played   { background: color-mix(in srgb, var(--clr-played) 30%, #fff); }
-.tile.hand     { background: color-mix(in srgb, var(--clr-hand) 30%, #fff); }
-
-/* علامة الحالة (✅ 🛑) */
-.marker {
+.tile .marker {
   position: absolute;
-  top: 4px;
-  inset-inline-end: 4px;
-  font-size: 1.05rem;
-  opacity: 0.9;
-  pointer-events: none;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: transparent;
+  transition: background-color 0.3s;
+  z-index: 2;
 }
 
-/* القائمة المنسدلة */
-.state-select {
-  position: absolute;
-  bottom: 4px;
-  inset-inline-start: 4px;
-  width: calc(100% - 8px);
-  font-size: 0.72rem;
-  display: none;
-}
-
-.tile.show-select .state-select { display: block; }
-
-/* العداد */
-aside#counterBox {
-  width: 160px;
-  background: #fff;
-  border: 1px solid var(--clr-border);
-  border-radius: 8px;
-  padding: 0.75rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  height: fit-content;
-}
-aside h2 {
-  margin: 0 0 0.5rem;
-  font-size: 0.95rem;
-  text-align: center;
-  color: #0f172a;
-}
-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-table td { padding: 2px 0; text-align: center; }
-table tr:nth-child(even) td { background: #f1f5f9; }
-
-#resetBtn {
-  margin-top: 10px;
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  justify-content: center;
+  align-content: center;
   width: 100%;
-  padding: 6px;
+  height: 45%;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.divider {
+  width: 80%;
+  height: 1px;
+  background-color: #555;
+}
+
+select {
+  width: 100%;
+  margin-top: 0.15rem;
+  background-color: #1f1f1f;
+  color: white;
   border: none;
+  padding: 0.1rem;
   border-radius: 4px;
-  background: #475569;
-  color: #fff;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-#resetBtn:hover { background: #334155; }
-
-/* ميديا لاستيعاب الهواتف الصغيرة */
-@media (max-width: 420px) {
-  #dominoGrid { gap: 4px; }
-  .state-select { font-size: 0.65rem; }
+  font-size: 0.6rem;
 }
 
   </style>
 </head>
 <body>
-  <header>لوحة تتبّع الدومينو</header>  <main>
-    <section id="dominoGrid" aria-label="شبكة البلاطات"></section>
-    <aside id="counterBox">
-      <h2>الإحصاء</h2>
-      <table><tbody id="counterTable"></tbody></table>
-      <button id="resetBtn">إعادة ضبط</button>
-    </aside>
-  </main>  <script>
-    const grid = document.getElementById("dominoGrid");
-    const counterTable = document.getElementById("counterTable");
-    const resetBtn = document.getElementById("resetBtn");
+  <h2>كروت الدومينو</h2>
+  <div class="grid" id="dominoGrid"></div>  <script>
+    const grid = document.getElementById('dominoGrid');
 
-    const tilesData = [];
-    for (let a=0; a<=6; a++) for (let b=a; b<=6; b++) tilesData.push({a,b,id:`${a}-${b}`});
-
-    /* ---- SVG ---- */
-    function dotPositions(val, offY=0){
-      const pos = [[25,25],[50,25],[75,25],[25,50],[50,50],[75,50],[25,75],[50,75],[75,75]];
-      const map = {0:[],1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
-      return map[val].map(i=>({cx:pos[i][0],cy:pos[i][1]+offY}));
-    }
-    function tileSVG(a,b){
-      const circles=[...dotPositions(a,0),...dotPositions(b,100)]
-        .map(c=>`<circle cx="${c.cx}" cy="${c.cy}" r="8" fill="black" />`).join("\n");
-      return `<svg viewBox='0 0 100 200' width='100%' height='100%'><rect x='1' y='1' width='98' height='198' rx='8' ry='8' fill='white' stroke='black' stroke-width='1.2'/><line x1='0' y1='100' x2='100' y2='100' stroke='black' stroke-width='2'/>${circles}</svg>`;
+    function createDots(n) {
+      const container = document.createElement('div');
+      container.className = 'dots';
+      for (let i = 0; i < n; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        container.appendChild(dot);
+      }
+      return container;
     }
 
-    /* ---- بناء البلاطات ---- */
-    function buildTiles(){
-      const saved=JSON.parse(localStorage.getItem("dominoStates")||"{}");
-      tilesData.forEach(t=>{
-        const div=document.createElement("div");
-        div.className="tile";
-        div.dataset.id=t.id;
-        div.innerHTML = tileSVG(t.a,t.b);
-        // marker
-        const marker=document.createElement("span");
-        marker.className="marker";
-        div.appendChild(marker);
-        // select
-        const select=document.createElement("select");
-        select.className="state-select";
-        select.innerHTML=`<option value='unknown'>❔ غير معروف</option><option value='played'>✅ نزلت</option><option value='hand'>🛑 في إيدي</option>`;
-        div.appendChild(select);
-        grid.appendChild(div);
-        // init state
-        const st=saved[t.id]||"unknown";
-        select.value=st; applyState(div,st);
-        // toggle select
-        div.addEventListener("click",e=>{ if(e.target.tagName!="SELECT") div.classList.toggle("show-select"); });
-        // change
-        select.addEventListener("change",()=>{applyState(div,select.value);saveStates();updateCounter();});
-      });
-    }
+    function createTile(top, bottom) {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
 
-    function applyState(tile, state){
-      tile.classList.remove("played","hand");
-      const marker=tile.querySelector(".marker");
-      marker.textContent="";
-      if(state==="played"){tile.classList.add("played"); marker.textContent="✅";}
-      else if(state==="hand"){tile.classList.add("hand"); marker.textContent="🛑";}
-      tile.classList.remove("show-select");
-    }
+      const marker = document.createElement('div');
+      marker.className = 'marker';
 
-    function saveStates(){
-      const s={};
-      document.querySelectorAll(".tile").forEach(t=>s[t.dataset.id]=t.querySelector("select").value);
-      localStorage.setItem("dominoStates",JSON.stringify(s));
-    }
+      const topDots = createDots(top);
+      const divider = document.createElement('div');
+      divider.className = 'divider';
+      const bottomDots = createDots(bottom);
 
-    function updateCounter(){
-      const counts=Array(7).fill(0);
-      document.querySelectorAll(".tile").forEach(t=>{
-        const st=t.querySelector("select").value;
-        if(st==="unknown"){
-          const [a,b]=t.dataset.id.split("-").map(Number);
-          counts[a]++; if(a!==b) counts[b]++;
+      const select = document.createElement('select');
+      const opt0 = new Option('—', '');
+      const opt1 = new Option('✅', 'check');
+      const opt2 = new Option('🛑', 'stop');
+      select.appendChild(opt0);
+      select.appendChild(opt1);
+      select.appendChild(opt2);
+
+      select.addEventListener('change', () => {
+        if (select.value === 'check') {
+          marker.style.backgroundColor = 'limegreen';
+        } else if (select.value === 'stop') {
+          marker.style.backgroundColor = 'red';
+        } else {
+          marker.style.backgroundColor = 'transparent';
         }
       });
-      counterTable.innerHTML=counts.map((n,i)=>`<tr><td>الرقم ${i}</td><td>${n} باقي</td></tr>`).join("");
+
+      tile.appendChild(marker);
+      tile.appendChild(topDots);
+      tile.appendChild(divider);
+      tile.appendChild(bottomDots);
+      tile.appendChild(select);
+
+      return tile;
     }
 
-    resetBtn.addEventListener("click",()=>{
-      if(!confirm("هل تريد إعادة الضبط؟")) return;
-      document.querySelectorAll(".tile").forEach(t=>{const s=t.querySelector("select");s.value="unknown";applyState(t,"unknown");});
-      saveStates();updateCounter();
-    });
-
-    buildTiles();
-    updateCounter();
+    // إنشاء البلاطات بترتيب هرمي
+    for (let top = 0; top <= 6; top++) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      for (let bottom = 0; bottom <= top; bottom++) {
+        const tile = createTile(bottom, top);
+        row.appendChild(tile);
+      }
+      grid.appendChild(row);
+    }
   </script></body>
 </html>
