@@ -1,153 +1,163 @@
-<!DOCTYPE html><html lang="ar">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مساعد الدومينو</title>
+  <title>لوحة تتبع الدومينو</title>
   <style>
-    body {
-      background-color: #121212;
-      color: #fff;
-      font-family: sans-serif;
-      padding: 1rem;
-    }.grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: center;
+    :root{
+      --clr-bg:#f4f5f7;
+      --clr-card:#ffffff;
+      --clr-card-edge:#e2e8f0;
+      --clr-border:#cbd5e1;
+      --clr-check:#10b981; /* أخضر */
+      --clr-stop:#ef4444;  /* أحمر */
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family:"Cairo",sans-serif;
+      background:var(--clr-bg);
+      color:#0f172a;
+      padding:0.75rem;
+    }
+    h1{margin:0 0 0.75rem;text-align:center;font-size:1.2rem;}/* شبكة */
+.grid{display:flex;flex-direction:column;gap:0.5rem;align-items:center;}
+.row{display:flex;gap:0.5rem;justify-content:center;}
+
+/* البلاطة */
+.tile{
+  width:clamp(42px,13vw,60px);
+  aspect-ratio:1 / 1.6;
+  background:linear-gradient(160deg,var(--clr-card) 0%,var(--clr-card-edge) 100%);
+  border:1px solid var(--clr-border);
+  border-radius:8px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+  position:relative;
+  padding:2px 4px;
+  display:flex;flex-direction:column;justify-content:space-between;align-items:center;
+  user-select:none;cursor:pointer;
+}
+.tile:active{transform:scale(.97);}    
+/* علامة */
+.marker{
+  position:absolute;top:2px;inset-inline-end:2px;
+  width:9px;height:9px;border-radius:50%;background:transparent;pointer-events:none;
 }
 
-.row {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
+/* dots */
+.dots{display:flex;flex-wrap:wrap;gap:2px;width:100%;height:45%;justify-content:center;align-content:center;}
+.dot{width:4px;height:4px;background:#000;border-radius:50%;}
+
+.divider{width:80%;height:1px;background:#6b7280;}
+
+/* select */
+select{
+  width:100%;margin-top:2px;font-size:.58rem;
+  background:#f1f5f9;border:1px solid var(--clr-border);border-radius:3px;color:#000;padding:1px 2px;
 }
 
-.tile {
-  width: 48px;
-  aspect-ratio: 1 / 1.6;
-  background: linear-gradient(145deg, #2e2e2e, #1a1a1a);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.25rem;
-  position: relative;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+/* الإحصاء */
+.counterBox{
+  margin-top:1rem;
+  background:#ffffff;border:1px solid var(--clr-border);border-radius:8px;
+  padding:0.5rem;max-width:320px;margin-inline:auto;box-shadow:0 2px 6px rgba(0,0,0,.05);
 }
-
-.tile .marker {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: transparent;
-  transition: background-color 0.3s;
-  z-index: 2;
-}
-
-.dots {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  justify-content: center;
-  align-content: center;
-  width: 100%;
-  height: 45%;
-}
-
-.dot {
-  width: 4px;
-  height: 4px;
-  background-color: white;
-  border-radius: 50%;
-}
-
-.divider {
-  width: 80%;
-  height: 1px;
-  background-color: #555;
-}
-
-select {
-  width: 100%;
-  margin-top: 0.15rem;
-  background-color: #1f1f1f;
-  color: white;
-  border: none;
-  padding: 0.1rem;
-  border-radius: 4px;
-  font-size: 0.6rem;
-}
+.counterBox h2{margin:0 0 0.5rem;text-align:center;font-size:.95rem;color:#0f172a;}
+table{width:100%;border-collapse:collapse;font-size:.8rem;}
+td{padding:3px 0;text-align:center;}
+tr:nth-child(even) td{background:#f8fafc;}
+#resetBtn{margin-top:8px;width:100%;padding:6px;border:none;border-radius:4px;background:#475569;color:#fff;font-size:.8rem;cursor:pointer;}
+#resetBtn:hover{background:#334155;}
 
   </style>
 </head>
 <body>
-  <h2>كروت الدومينو</h2>
-  <div class="grid" id="dominoGrid"></div>  <script>
+  <h1>لوحة تتبع الدومينو</h1>
+  <div class="grid" id="dominoGrid"></div>  <section class="counterBox">
+    <h2>الإحصاء</h2>
+    <table><tbody id="counterTable"></tbody></table>
+    <button id="resetBtn">إعادة ضبط</button>
+  </section>  <script>
+    /* عناصر DOM */
     const grid = document.getElementById('dominoGrid');
+    const counterTable = document.getElementById('counterTable');
+    const resetBtn = document.getElementById('resetBtn');
 
-    function createDots(n) {
-      const container = document.createElement('div');
-      container.className = 'dots';
-      for (let i = 0; i < n; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        container.appendChild(dot);
-      }
-      return container;
+    /* بيانات البلاطات */
+    const tilesData = [];
+    for(let top=0; top<=6; top++) for(let bottom=0; bottom<=top; bottom++) tilesData.push({top,bottom,id:`${bottom}-${top}`});
+
+    /* استرجاع حالة محفوظة */
+    const savedStates = JSON.parse(localStorage.getItem('dominoStates')||'{}');
+
+    /* رسم النقاط */
+    function createDots(n){
+      const cnt=document.createElement('div');cnt.className='dots';
+      for(let i=0;i<n;i++){const d=document.createElement('div');d.className='dot';cnt.appendChild(d);}return cnt;
     }
 
-    function createTile(top, bottom) {
-      const tile = document.createElement('div');
-      tile.className = 'tile';
+    /* إنشاء بلاطة */
+    function createTile(top,bottom,id){
+      const tile=document.createElement('div');tile.className='tile';tile.dataset.id=id;
+      const marker=document.createElement('span');marker.className='marker';tile.appendChild(marker);
+      const topDots=createDots(top);const divider=document.createElement('div');divider.className='divider';const bottomDots=createDots(bottom);
+      const select=document.createElement('select');
+      select.innerHTML='<option value="unknown">—</option><option value="played">✅</option><option value="hand">🛑</option>';
+      tile.append(topDots,divider,bottomDots,select);
 
-      const marker = document.createElement('div');
-      marker.className = 'marker';
+      /* استعادة حالة */
+      const initState=savedStates[id]||'unknown';select.value=initState;applyState(tile,initState);
 
-      const topDots = createDots(top);
-      const divider = document.createElement('div');
-      divider.className = 'divider';
-      const bottomDots = createDots(bottom);
-
-      const select = document.createElement('select');
-      const opt0 = new Option('—', '');
-      const opt1 = new Option('✅', 'check');
-      const opt2 = new Option('🛑', 'stop');
-      select.appendChild(opt0);
-      select.appendChild(opt1);
-      select.appendChild(opt2);
-
-      select.addEventListener('change', () => {
-        if (select.value === 'check') {
-          marker.style.backgroundColor = 'limegreen';
-        } else if (select.value === 'stop') {
-          marker.style.backgroundColor = 'red';
-        } else {
-          marker.style.backgroundColor = 'transparent';
-        }
-      });
-
-      tile.appendChild(marker);
-      tile.appendChild(topDots);
-      tile.appendChild(divider);
-      tile.appendChild(bottomDots);
-      tile.appendChild(select);
-
+      /* أحداث */
+      tile.addEventListener('click',e=>{if(e.target.tagName!=='SELECT')select.focus();});
+      select.addEventListener('change',()=>{applyState(tile,select.value);saveStates();updateCounter();});
       return tile;
     }
 
-    // إنشاء البلاطات بترتيب هرمي
-    for (let top = 0; top <= 6; top++) {
-      const row = document.createElement('div');
-      row.className = 'row';
-      for (let bottom = 0; bottom <= top; bottom++) {
-        const tile = createTile(bottom, top);
-        row.appendChild(tile);
-      }
-      grid.appendChild(row);
+    /* تطبيق حالة */
+    function applyState(tile,state){
+      const marker=tile.querySelector('.marker');
+      if(state==='played') marker.style.background= 'var(--clr-check)';
+      else if(state==='hand') marker.style.background='var(--clr-stop)';
+      else marker.style.background='transparent';
     }
+
+    /* بناء الشبكة */
+    function buildGrid(){
+      let currentTop=-1,row;
+      tilesData.forEach(t=>{
+        if(t.bottom!==currentTop){currentTop=t.bottom;row=document.createElement('div');row.className='row';grid.appendChild(row);} // صف جديد
+        const tile=createTile(t.top,t.bottom,t.id);
+        row.appendChild(tile);
+      });
+    }
+
+    /* حفظ */
+    function saveStates(){
+      const states={};
+      document.querySelectorAll('.tile').forEach(t=>{states[t.dataset.id]=t.querySelector('select').value;});
+      localStorage.setItem('dominoStates',JSON.stringify(states));
+    }
+
+    /* إحصاء */
+    function updateCounter(){
+      const counts=Array(7).fill(0);
+      document.querySelectorAll('.tile').forEach(t=>{
+        const state=t.querySelector('select').value; if(state==='unknown'){
+          const [a,b]=t.dataset.id.split('-').map(Number); counts[a]++; if(a!==b) counts[b]++; }
+      });
+      counterTable.innerHTML=counts.map((n,i)=>`<tr><td>الرقم ${i}</td><td>${n} باقي</td></tr>`).join('');
+    }
+
+    /* إعادة ضبط */
+    resetBtn.addEventListener('click',()=>{
+      if(!confirm('هل تريد إعادة الضبط؟'))return;
+      document.querySelectorAll('.tile select').forEach(sel=>{sel.value='unknown';});
+      document.querySelectorAll('.tile').forEach(t=>applyState(t,'unknown'));
+      saveStates();updateCounter();
+    });
+
+    /* تهيئة */
+    buildGrid(); updateCounter();
   </script></body>
 </html>
