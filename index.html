@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title> محمد وليد سعيد حسن </title>
+  <title>لوحة تتبع الدومينو</title>
   <style>
     :root {
       --clr-bg: #f4f5f7;
@@ -102,17 +102,6 @@
       background: #6b7280;
     }
 
-    select {
-      width: 100%;
-      margin-top: 2px;
-      font-size: 0.58rem;
-      background: #f1f5f9;
-      border: 1px solid var(--clr-border);
-      border-radius: 3px;
-      color: #000;
-      padding: 1px 2px;
-    }
-
     .counterBox {
       background: #ffffff;
       border: 1px solid var(--clr-border);
@@ -164,9 +153,6 @@
       .tile {
         width: 48px;
       }
-      .tile select {
-        font-size: 0.65rem;
-      }
       .tileNumber {
         font-size: 1rem;
       }
@@ -217,20 +203,14 @@
       bottomLabel.className = 'tileNumber';
       bottomLabel.textContent = bottom;
 
-      const select = document.createElement('select');
-      select.innerHTML = '<option value="unknown">—</option><option value="played">✅</option><option value="hand">🛑</option>';
+      tile.append(topLabel, divider, bottomLabel);
 
-      tile.append(topLabel, divider, bottomLabel, select);
+      let currentState = savedStates[id] || 'unknown';
+      applyState(tile, currentState);
 
-      const initState = savedStates[id] || 'unknown';
-      select.value = initState;
-      applyState(tile, initState);
-
-      tile.addEventListener('click', e => {
-        if (e.target.tagName !== 'SELECT') select.focus();
-      });
-      select.addEventListener('change', () => {
-        applyState(tile, select.value);
+      tile.addEventListener('click', () => {
+        currentState = currentState === 'hand' ? 'unknown' : 'hand';
+        applyState(tile, currentState);
         saveStates();
         updateCounter();
       });
@@ -239,9 +219,9 @@
     }
 
     function applyState(tile, state) {
+      tile.dataset.state = state;
       const marker = tile.querySelector('.marker');
-      if (state === 'played') marker.style.background = 'var(--clr-check)';
-      else if (state === 'hand') marker.style.background = 'var(--clr-stop)';
+      if (state === 'hand') marker.style.background = 'var(--clr-stop)';
       else marker.style.background = 'transparent';
     }
 
@@ -264,7 +244,7 @@
     function saveStates() {
       const states = {};
       document.querySelectorAll('.tile').forEach(t => {
-        states[t.dataset.id] = t.querySelector('select').value;
+        states[t.dataset.id] = t.dataset.state || 'unknown';
       });
       localStorage.setItem('dominoStates', JSON.stringify(states));
     }
@@ -272,7 +252,7 @@
     function updateCounter() {
       const counts = Array(7).fill(0);
       document.querySelectorAll('.tile').forEach(t => {
-        const state = t.querySelector('select').value;
+        const state = t.dataset.state;
         if (state === 'unknown') {
           const [a, b] = t.dataset.id.split('-').map(Number);
           counts[a]++;
@@ -285,8 +265,9 @@
 
     resetBtn.addEventListener('click', () => {
       if (!confirm('هل تريد إعادة الضبط؟')) return;
-      document.querySelectorAll('.tile select').forEach(sel => sel.value = 'unknown');
-      document.querySelectorAll('.tile').forEach(t => applyState(t, 'unknown'));
+      document.querySelectorAll('.tile').forEach(t => {
+        applyState(t, 'unknown');
+      });
       saveStates();
       updateCounter();
     });
